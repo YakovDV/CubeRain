@@ -25,15 +25,15 @@ public class Cube : MonoBehaviour
 
     private void OnEnable()
     {
-        _collisionHandler.HitPlatform += ChangeCollisionStatus;
+        _collisionHandler.HitPlatform += HandlePlatformCollision;
     }
 
     private void OnDisable()
     {
-        _collisionHandler.HitPlatform -= ChangeCollisionStatus;
+        _collisionHandler.HitPlatform -= HandlePlatformCollision;
     }
 
-    public void ChangeCollisionStatus()
+    public void HandlePlatformCollision()
     {
         if (_hasFirstCollision)
             return;
