@@ -15,8 +15,8 @@ public class CubePool : MonoBehaviour
     {
         _pool = new ObjectPool<Cube>(
             createFunc: () => Instantiate(_prefab),
-            actionOnGet: (cube) => ActionOnGet(cube),
-            actionOnRelease: (cube) => ActionOnRelease(cube),
+            actionOnGet: (cube) => cube.gameObject.SetActive(true),
+            actionOnRelease: (cube) => cube.gameObject.SetActive(false),
             actionOnDestroy: (cube) =>
             {
                 Destroy(cube.gameObject);
@@ -35,15 +35,5 @@ public class CubePool : MonoBehaviour
     public void ReleaseCube(Cube cube)
     {
         _pool.Release(cube);
-    }
-
-    private void ActionOnGet(Cube cube)
-    {
-        cube.gameObject.SetActive(true);
-    }
-
-    private void ActionOnRelease(Cube cube)
-    {
-        cube.gameObject.SetActive(false);
     }
 }
