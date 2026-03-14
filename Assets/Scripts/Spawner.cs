@@ -4,25 +4,13 @@ using UnityEngine;
 public class Spawner : MonoBehaviour
 {
     [SerializeField] private Vector3 _spawnCenter = new(0f, 5f, 0f);
-    [SerializeField] private Vector3 _spawnScale = new(10f, 1f, 10f);
+    [SerializeField] private Vector3 _spawnScale = new(8f, 1f, 8f);
     [SerializeField] private float _delay = 0.5f;
 
     [SerializeField] private float _minObjectLife = 2;
     [SerializeField] private float _maxObjectLife = 5;
 
-    [SerializeField] private ColorChanger _colorChanger;
-    [SerializeField] private CollisionHandler _collisionHandler;
     [SerializeField] private CubePool _cubePool;
-
-    private void OnEnable()
-    {
-        _collisionHandler.HitPlatform += HandleCollision;
-    }
-
-    private void OnDisable()
-    {
-        _collisionHandler.HitPlatform -= HandleCollision;
-    }
 
     private void Start()
     {
@@ -32,12 +20,14 @@ public class Spawner : MonoBehaviour
     private void ActivateCube()
     {
         Cube cube = _cubePool.GetCube();
+        cube.ResetStats();
+
         Vector3 spawnPoint = CalculateSpawnPoint();
 
         cube.transform.position = spawnPoint;
         cube.transform.rotation = Quaternion.identity;
 
-        _collisionHandler.Register(cube);
+        cube.FirstPlatformCollision += StartLifetime;
     }
 
     private Vector3 CalculateSpawnPoint()
@@ -51,10 +41,8 @@ public class Spawner : MonoBehaviour
         return spawnPoint;
     }
 
-    private void HandleCollision(Cube cube)
+    private void StartLifetime(Cube cube)
     {
-        _colorChanger.ChangeColor(cube);
-
         float lifetime = Random.Range(_minObjectLife, _maxObjectLife);
 
         StartCoroutine(WaitLifetime(lifetime, cube));
@@ -64,7 +52,8 @@ public class Spawner : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(seconds);
 
-        _collisionHandler.Unregister(cube);
+        cube.FirstPlatformCollision -= StartLifetime;
+        cube.ResetStats();
         _cubePool.ReleaseCube(cube);
         ActivateCube();
     }

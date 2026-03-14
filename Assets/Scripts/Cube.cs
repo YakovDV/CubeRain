@@ -6,29 +6,49 @@ using UnityEngine;
 public class Cube : MonoBehaviour
 {
     [SerializeField] private Color _baseColor = Color.white;
-
-    public Rigidbody Rigidbody => GetComponent<Rigidbody>();
-    public bool HasFirstCollision => _hasFirstCollision;
+    [SerializeField] private CollisionHandler _collisionHandler;
+    [SerializeField] private ColorChanger _colorChanger;
 
     private bool _hasFirstCollision = false;
+    private Rigidbody _rigidbody;
+    private Renderer _renderer;
 
-    public event Action<Cube, Collision> FirstCollisionHappened;
+    public bool HasFirstCollision => _hasFirstCollision;
 
-    private void OnCollisionEnter(Collision collision)
+    public event Action<Cube> FirstPlatformCollision;
+
+    private void Awake()
     {
-        FirstCollisionHappened?.Invoke(this, collision);
+        _rigidbody = GetComponent<Rigidbody>();
+        _renderer = GetComponent<Renderer>();
+    }
+
+    private void OnEnable()
+    {
+        _collisionHandler.HitPlatform += ChangeCollisionStatus;
+    }
+
+    private void OnDisable()
+    {
+        _collisionHandler.HitPlatform -= ChangeCollisionStatus;
     }
 
     public void ChangeCollisionStatus()
     {
+        if (_hasFirstCollision)
+            return;
+
         _hasFirstCollision = true;
+
+        _colorChanger.ChangeColor(this);
+        FirstPlatformCollision?.Invoke(this);
     }
 
     public void ResetStats()
     {
         _hasFirstCollision = false;
-        this.GetComponent<Renderer>().material.color = _baseColor;
-        this.Rigidbody.velocity = Vector3.zero;
-        this.Rigidbody.angularVelocity = Vector3.zero;
+        this._renderer.material.color = _baseColor;
+        this._rigidbody.velocity = Vector3.zero;
+        this._rigidbody.angularVelocity = Vector3.zero;
     }
 }

@@ -3,29 +3,13 @@ using UnityEngine;
 
 public class CollisionHandler : MonoBehaviour
 {
-    [SerializeField] private LayerMask _platforms;
+    public event Action HitPlatform;
 
-    public event Action<Cube> HitPlatform;
-
-    public void Register(Cube cube)
+    private void OnCollisionEnter(Collision collision)
     {
-        cube.FirstCollisionHappened += HandleCollision;
-    }
-
-    public void Unregister(Cube cube)
-    {
-        cube.FirstCollisionHappened -= HandleCollision;
-    }
-
-    private void HandleCollision(Cube cube, Collision collision)
-    {
-        if ((_platforms.value & (1 << collision.gameObject.layer)) == 0 || cube.HasFirstCollision == true)
+        if (collision.gameObject.GetComponent<Platform>() != null)
         {
-            return;
+            HitPlatform?.Invoke();
         }
-
-        cube.ChangeCollisionStatus();
-
-        HitPlatform?.Invoke(cube);
     }
 }

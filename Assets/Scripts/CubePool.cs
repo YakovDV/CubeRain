@@ -40,12 +40,10 @@ public class CubePool : MonoBehaviour
     private void ActionOnGet(Cube cube)
     {
         cube.gameObject.SetActive(true);
-        cube.ResetStats();
     }
 
     private void ActionOnRelease(Cube cube)
     {
-        cube.ResetStats();
         cube.gameObject.SetActive(false);
     }
 }
