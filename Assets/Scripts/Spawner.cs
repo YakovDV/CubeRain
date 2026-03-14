@@ -7,9 +7,6 @@ public class Spawner : MonoBehaviour
     [SerializeField] private Vector3 _spawnScale = new(8f, 1f, 8f);
     [SerializeField] private float _delay = 0.5f;
 
-    [SerializeField] private float _minObjectLife = 2;
-    [SerializeField] private float _maxObjectLife = 5;
-
     [SerializeField] private CubePool _cubePool;
 
     private void Start()
@@ -27,7 +24,7 @@ public class Spawner : MonoBehaviour
         cube.transform.position = spawnPoint;
         cube.transform.rotation = Quaternion.identity;
 
-        cube.FirstPlatformCollision += StartLifetime;
+        cube.ReadyToReturn += ReturnCube;
     }
 
     private Vector3 CalculateSpawnPoint()
@@ -41,29 +38,20 @@ public class Spawner : MonoBehaviour
         return spawnPoint;
     }
 
-    private void StartLifetime(Cube cube)
+    private void ReturnCube(Cube cube)
     {
-        float lifetime = Random.Range(_minObjectLife, _maxObjectLife);
-
-        StartCoroutine(WaitLifetime(lifetime, cube));
-    }
-
-    private IEnumerator WaitLifetime(float seconds, Cube cube)
-    {
-        yield return new WaitForSecondsRealtime(seconds);
-
-        cube.FirstPlatformCollision -= StartLifetime;
-        cube.ResetStats();
+        cube.ReadyToReturn -= ReturnCube;
         _cubePool.ReleaseCube(cube);
+
         ActivateCube();
     }
 
     private IEnumerator SpawnCubes(int count, float delay)
     {
-            for (int i = 0; i < count; i++)
-            {
-                ActivateCube();
-                yield return new WaitForSecondsRealtime(delay);
-            }
+        for (int i = 0; i < count; i++)
+        {
+            ActivateCube();
+            yield return new WaitForSecondsRealtime(delay);
+        }
     }
 }
